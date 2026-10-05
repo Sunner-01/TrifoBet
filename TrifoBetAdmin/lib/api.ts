@@ -112,6 +112,38 @@ export async function getUsuarios(params?: {
   return request<UsuariosResponse>(`/admin/usuarios?${qs.toString()}`)
 }
 
+export async function exportUsuariosCsv(params?: {
+  search?: string
+  habilitado?: string
+  rol_id?: string
+}): Promise<Blob> {
+  const qs = new URLSearchParams()
+  if (params?.search) qs.set('search', params.search)
+  if (params?.habilitado !== undefined) qs.set('habilitado', params.habilitado)
+  if (params?.rol_id) qs.set('rol_id', params.rol_id)
+
+  const token = getToken()
+  const response = await fetch(`${API_URL}/admin/users/export/csv?${qs.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+
+  if (!response.ok) {
+    if (response.status === 401 && typeof window !== 'undefined') {
+      sessionStorage.removeItem('admin_token')
+      sessionStorage.removeItem('admin_user')
+      window.location.href = '/'
+    }
+
+    const error = await response.json().catch(() => null)
+    const message = Array.isArray(error?.message)
+      ? error.message.join(', ')
+      : error?.message
+    throw new Error(message || `No se pudo exportar el CSV (HTTP ${response.status})`)
+  }
+
+  return response.blob()
+}
+
 export async function getUsuario(id: number): Promise<UsuarioAdmin> {
   return request<UsuarioAdmin>(`/admin/usuarios/${id}`)
 }

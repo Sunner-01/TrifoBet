@@ -7,6 +7,7 @@ import { PaginationUtil } from '../common/utils/pagination.util';
 
 @Injectable()
 export class AdminUsersService {
+  private static readonly MAX_CSV_EXPORT_ROWS = 1000;
   private supabase: SupabaseClient;
 
   constructor(private configService: ConfigService) {
@@ -43,6 +44,95 @@ export class AdminUsersService {
     if (error) throw new BadRequestException(error.message);
 
     return PaginationUtil.formatResponse(data, count || 0, page, limit);
+  }
+
+  async exportUsuariosCsv(params: {
+    search?: string;
+    habilitado?: string;
+    rol_id?: string;
+  }): Promise<string> {
+    let query = this.supabase
+      .from('usuario')
+      .select(
+        'id, nombre, apellido1, apellido2, nombre_usuario, correo, habilitado, verificado, created_at',
+      )
+      .order('created_at', { ascending: false })
+      .limit(AdminUsersService.MAX_CSV_EXPORT_ROWS + 1);
+
+    if (params.search) {
+      query = query.or(
+        `nombre_usuario.ilike.%${params.search}%,correo.ilike.%${params.search}%,nombre.ilike.%${params.search}%`,
+      );
+    }
+
+    if (params.habilitado !== undefined && params.habilitado !== '') {
+      query = query.eq('habilitado', params.habilitado === 'true');
+    }
+
+    if (params.rol_id !== undefined && params.rol_id !== '') {
+      query = query.eq('rol_id', parseInt(params.rol_id));
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw new BadRequestException(error.message);
+
+    const usuarios = data || [];
+    if (usuarios.length === 0) {
+      throw new NotFoundException('No hay usuarios para exportar');
+    }
+
+    if (usuarios.length > AdminUsersService.MAX_CSV_EXPORT_ROWS) {
+      throw new BadRequestException(
+        'La exportación supera los 1.000 usuarios. Debe acotar los filtros de búsqueda',
+      );
+    }
+
+    const headers = [
+      'ID',
+      'Nombre completo',
+      'Nombre de usuario',
+      'Correo',
+      'Estado de cuenta',
+      'Estado de verificación',
+      'Fecha de registro',
+    ];
+
+    const rows = usuarios.map((usuario: any) => {
+      const nombreCompleto = [
+        usuario.nombre,
+        usuario.apellido1,
+        usuario.apellido2,
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+      return [
+        usuario.id,
+        nombreCompleto,
+        usuario.nombre_usuario,
+        usuario.correo,
+        usuario.habilitado ? 'Habilitado' : 'Suspendido',
+        usuario.verificado ? 'Verificado' : 'No verificado',
+        usuario.created_at,
+      ];
+    });
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map((value) => this.escapeCsvCell(value)).join(','))
+      .join('\r\n');
+
+    return `\uFEFF${csv}`;
+  }
+
+  private escapeCsvCell(value: unknown): string {
+    let text = value === null || value === undefined ? '' : String(value);
+
+    if (/^[=+\-@]/.test(text)) {
+      text = `'${text}`;
+    }
+
+    return `"${text.replace(/"/g, '""')}"`;
   }
 
   async getUsuario(id: number) {

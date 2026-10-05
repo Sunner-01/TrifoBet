@@ -1,6 +1,6 @@
 // hooks/useUsuarios.ts
 import { useState, useEffect, useCallback } from 'react'
-import { getUsuarios, toggleHabilitarUsuario, UsuarioAdmin, UsuariosResponse } from '@/lib/api'
+import { exportUsuariosCsv, getUsuarios, toggleHabilitarUsuario, UsuarioAdmin, UsuariosResponse } from '@/lib/api'
 
 export function useUsuarios() {
   const [data, setData] = useState<UsuariosResponse | null>(null)
@@ -14,6 +14,8 @@ export function useUsuarios() {
   const [selectedUser, setSelectedUser] = useState<UsuarioAdmin | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [togglingId, setTogglingId] = useState<number | null>(null)
+  const [exporting, setExporting] = useState(false)
+  const [exportNotice, setExportNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   const fetchUsuarios = useCallback(async () => {
     setLoading(true)
@@ -69,6 +71,34 @@ export function useUsuarios() {
     await fetchUsuarios()
   }
 
+  const handleExportCsv = async () => {
+    setExporting(true)
+    setExportNotice(null)
+
+    try {
+      const blob = await exportUsuariosCsv({
+        search: searchTerm || undefined,
+        habilitado: filterHabilitado || undefined,
+      })
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = 'usuarios_export.csv'
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(url)
+      setExportNotice({ type: 'success', message: 'Archivo CSV generado correctamente.' })
+    } catch (err) {
+      setExportNotice({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'No se pudo exportar el CSV'
+      })
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return {
     data,
     loading,
@@ -86,9 +116,12 @@ export function useUsuarios() {
     isModalOpen,
     setIsModalOpen,
     togglingId,
+    exporting,
+    exportNotice,
     fetchUsuarios,
     handleToggleHabilitar,
     handleEditUser,
-    handleSaveUser
+    handleSaveUser,
+    handleExportCsv
   }
 }
