@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CrearApuestaDto } from './dto/crear-apuesta.dto';
+import { parseHistoryNumber } from './dto/historial-filtros';
 
 import { ApuestasCoreService } from './services/apuestas-core.service';
 import { ApuestasQueryService } from './services/apuestas-query.service';
@@ -38,12 +39,14 @@ export class ApuestasDeportivasController {
     @Query('estado') estado?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
+    @Query('desde') desde?: string,
+    @Query('hasta') hasta?: string,
   ) {
     const usuarioId = req.user?.userId || req.user?.sub || req.user?.id;
-    const limitNum = limit ? parseInt(limit, 10) : 20;
-    const offsetNum = offset ? parseInt(offset, 10) : 0;
+    const limitNum = parseHistoryNumber(limit, 20, 'limit');
+    const offsetNum = parseHistoryNumber(offset, 0, 'offset');
 
-    return this.queryService.obtenerHistorial(usuarioId, estado, limitNum, offsetNum);
+    return this.queryService.obtenerHistorial(usuarioId, estado, limitNum, offsetNum, desde, hasta);
   }
 
   @Post(':id/cashout')
