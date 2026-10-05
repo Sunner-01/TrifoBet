@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
+import { ListSupportTicketsQueryDto } from './dto/list-support-tickets-query.dto';
+import { TicketPriority } from './dto/ticket-priority.enum';
 
 @Injectable()
 export class SoporteService {
@@ -17,7 +19,15 @@ export class SoporteService {
   async createTicket(userId: number, asunto: string, categoria: string) {
     const { data, error } = await this.supabase
       .from('ticket_soporte')
-      .insert([{ usuario_id: userId, asunto, categoria, estado: 'abierto' }])
+      .insert([
+        {
+          usuario_id: userId,
+          asunto,
+          categoria,
+          estado: 'abierto',
+          prioridad: TicketPriority.NORMAL,
+        },
+      ])
       .select()
       .single();
 
@@ -43,11 +53,26 @@ export class SoporteService {
     return data;
   }
 
-  async getAllTickets() {
-    const { data, error } = await this.supabase
+  async getAllTickets(filters: ListSupportTicketsQueryDto = {}) {
+    let query = this.supabase
       .from('ticket_soporte')
-      .select('*, usuario:usuario_id(nombre, apellido1, correo)')
-      .order('fecha_creacion', { ascending: false });
+      .select('*, usuario:usuario_id(nombre, apellido1, correo)');
+
+    if (filters.estado && filters.estado !== 'Todos') {
+      query = query.eq('estado', filters.estado);
+    }
+
+    if (filters.categoria && filters.categoria !== 'Todos') {
+      query = query.eq('categoria', filters.categoria);
+    }
+
+    if (filters.prioridad) {
+      query = query.eq('prioridad', filters.prioridad);
+    }
+
+    const { data, error } = await query.order('fecha_creacion', {
+      ascending: false,
+    });
 
     if (error) throw error;
     return data;
@@ -98,6 +123,24 @@ export class SoporteService {
       .single();
 
     if (error) throw error;
+    return data;
+  }
+
+  async updateTicketPriority(ticketId: number, prioridad: TicketPriority) {
+    const { data, error } = await this.supabase
+      .from('ticket_soporte')
+      .update({ prioridad })
+      .eq('id', ticketId)
+      .select()
+      .single();
+
+    if (error) {
+      this.logger.error(
+        `Error updating priority for ticket ${ticketId}: ${error.message}`,
+      );
+      throw error;
+    }
+
     return data;
   }
 
