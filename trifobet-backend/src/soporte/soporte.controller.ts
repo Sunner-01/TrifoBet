@@ -15,7 +15,6 @@ import { SoporteService } from './soporte.service';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { v2 as cloudinary } from 'cloudinary';
-import { AdminGuard } from '../admin/guards/admin.guard';
 
 @Controller('soporte')
 export class SoporteController {
@@ -46,13 +45,13 @@ export class SoporteController {
     return this.soporteService.getTicketMessages(parseInt(id));
   }
 
-  @UseGuards(AdminGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Get('admin/tickets')
   async getAllTickets() {
     return this.soporteService.getAllTickets();
   }
 
-  @UseGuards(AdminGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Put('admin/ticket/:id')
   async updateTicketStatus(
     @Param('id') id: string,
