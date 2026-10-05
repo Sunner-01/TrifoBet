@@ -11,16 +11,11 @@ interface UsuarioInfo {
   correo?: string;
 }
 
-type TicketPriority = 'baja' | 'normal' | 'alta' | 'urgente';
-
-const PRIORIDADES: TicketPriority[] = ['baja', 'normal', 'alta', 'urgente'];
-
 interface Ticket {
   id: number;
   asunto: string;
   categoria: string;
   estado: string;
-  prioridad: TicketPriority;
   usuario_id: number;
   usuario?: UsuarioInfo;
 }
@@ -40,18 +35,16 @@ export default function SoportePage() {
   const [newMessage, setNewMessage] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [socket, setSocket] = useState<Socket | null>(null)
-  const [selectedPriority, setSelectedPriority] = useState<TicketPriority>('normal')
-  const [isSavingPriority, setIsSavingPriority] = useState(false)
-  const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   
   // Filtros
   const [filterEstado, setFilterEstado] = useState('abierto')
   const [filterCategoria, setFilterCategoria] = useState('Todos')
-  const [filterPrioridad, setFilterPrioridad] = useState('Todos')
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    fetchTickets()
+
     const token = sessionStorage.getItem("admin_token")
     if (token) {
       const baseUrl = API_URL
@@ -71,10 +64,6 @@ export default function SoportePage() {
     }
   }, [])
 
-  useEffect(() => {
-    fetchTickets()
-  }, [filterEstado, filterCategoria, filterPrioridad])
-
   const scrollToBottom = () => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -87,28 +76,15 @@ export default function SoportePage() {
       if (!token) return
       
       const baseUrl = API_URL
-      const params = new URLSearchParams()
-      if (filterEstado !== 'Todos') params.set('estado', filterEstado)
-      if (filterCategoria !== 'Todos') params.set('categoria', filterCategoria)
-      if (filterPrioridad !== 'Todos') params.set('prioridad', filterPrioridad)
-
-      const query = params.toString()
-      const res = await fetch(`${baseUrl}/admin/support/tickets${query ? `?${query}` : ''}`, {
+      const res = await fetch(`${baseUrl}/soporte/admin/tickets`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      if (!res.ok) {
-        const error = await res.json().catch(() => null)
-        throw new Error(error?.message || `No se pudieron cargar los tickets (HTTP ${res.status})`)
+      if (res.ok) {
+        const data = await res.json()
+        setTickets(data)
       }
-
-      const data = await res.json()
-      setTickets(data)
     } catch (e) {
       console.error(e)
-      setNotice({
-        type: 'error',
-        message: e instanceof Error ? e.message : 'No se pudieron cargar los tickets'
-      })
     }
   }
 
@@ -118,8 +94,6 @@ export default function SoportePage() {
     }
     
     setActiveTicket(ticket)
-    setSelectedPriority(ticket.prioridad || 'normal')
-    setNotice(null)
     
     try {
       const token = sessionStorage.getItem("admin_token")
@@ -205,63 +179,6 @@ export default function SoportePage() {
     }
   }
 
-  const savePriority = async () => {
-    if (!activeTicket || selectedPriority === activeTicket.prioridad) return
-
-    const previousPriority = activeTicket.prioridad || 'normal'
-    setIsSavingPriority(true)
-    setNotice(null)
-
-    try {
-      const token = sessionStorage.getItem("admin_token")
-      if (!token) throw new Error('La sesión administrativa no está disponible')
-
-      const res = await fetch(`${API_URL}/admin/support/tickets/${activeTicket.id}/priority`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ prioridad: selectedPriority })
-      })
-
-      if (!res.ok) {
-        const error = await res.json().catch(() => null)
-        const message = Array.isArray(error?.message)
-          ? error.message.join(', ')
-          : error?.message
-        throw new Error(message || `No se pudo actualizar la prioridad (HTTP ${res.status})`)
-      }
-
-      const updatedTicket: Ticket = await res.json()
-      const persistedPriority = updatedTicket.prioridad || selectedPriority
-
-      setActiveTicket((current) => current
-        ? { ...current, ...updatedTicket, prioridad: persistedPriority }
-        : current
-      )
-      setTickets((current) => current.map((ticket) =>
-        ticket.id === activeTicket.id
-          ? { ...ticket, ...updatedTicket, prioridad: persistedPriority }
-          : ticket
-      ))
-      setSelectedPriority(persistedPriority)
-      setNotice({ type: 'success', message: 'Prioridad actualizada correctamente.' })
-
-      if (filterPrioridad !== 'Todos' && filterPrioridad !== persistedPriority) {
-        fetchTickets()
-      }
-    } catch (e) {
-      setSelectedPriority(previousPriority)
-      setNotice({
-        type: 'error',
-        message: e instanceof Error ? e.message : 'No se pudo actualizar la prioridad'
-      })
-    } finally {
-      setIsSavingPriority(false)
-    }
-  }
-
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       setSelectedFile(e.target.files[0])
@@ -269,6 +186,12 @@ export default function SoportePage() {
   }
 
   // Filtrado
+  const filteredTickets = tickets.filter(t => {
+    if (filterEstado !== 'Todos' && t.estado !== filterEstado) return false
+    if (filterCategoria !== 'Todos' && t.categoria !== filterCategoria) return false
+    return true
+  })
+
   // Categorías únicas para el filtro
   const categoriasUnicas = ['Todos', ...Array.from(new Set(tickets.map(t => t.categoria)))]
 
@@ -278,19 +201,6 @@ export default function SoportePage() {
         <h1 className="text-3xl font-bold text-foreground">Gestión de Soporte</h1>
         <p className="text-muted-foreground">Sistema de Tickets y Chat en vivo</p>
       </div>
-
-      {notice && (
-        <div
-          role="alert"
-          className={`rounded-md border px-4 py-3 text-sm ${
-            notice.type === 'success'
-              ? 'border-green-500/40 bg-green-500/10 text-green-500'
-              : 'border-red-500/40 bg-red-500/10 text-red-500'
-          }`}
-        >
-          {notice.message}
-        </div>
-      )}
 
       <div className="flex gap-4 h-full">
         {/* Panel Izquierdo: Lista de Tickets */}
@@ -316,25 +226,11 @@ export default function SoportePage() {
               >
                 {categoriasUnicas.map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
-
-              <select
-                aria-label="Filtrar por prioridad"
-                className="w-full text-sm p-2 bg-background border border-border rounded"
-                value={filterPrioridad}
-                onChange={(e) => setFilterPrioridad(e.target.value)}
-              >
-                <option value="Todos">Todas las prioridades</option>
-                {PRIORIDADES.map((prioridad) => (
-                  <option key={prioridad} value={prioridad}>
-                    {prioridad.charAt(0).toUpperCase() + prioridad.slice(1)}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
           <div className="overflow-y-auto flex-1">
-            {tickets.map((ticket) => (
+            {filteredTickets.map((ticket) => (
               <button
                 key={ticket.id}
                 onClick={() => selectTicket(ticket)}
@@ -353,20 +249,9 @@ export default function SoportePage() {
                 <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
                   <User size={12} /> {ticket.usuario?.nombre || 'Usuario'} | <Tag size={12} /> {ticket.categoria}
                 </div>
-                <span className={`inline-flex text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${
-                  ticket.prioridad === 'urgente'
-                    ? 'bg-red-500/20 text-red-500'
-                    : ticket.prioridad === 'alta'
-                      ? 'bg-orange-500/20 text-orange-500'
-                      : ticket.prioridad === 'baja'
-                        ? 'bg-blue-500/20 text-blue-500'
-                        : 'bg-slate-500/20 text-slate-400'
-                }`}>
-                  {ticket.prioridad || 'normal'}
-                </span>
               </button>
             ))}
-            {tickets.length === 0 && (
+            {filteredTickets.length === 0 && (
               <div className="p-4 text-center text-sm text-muted-foreground">
                 No hay tickets que coincidan con los filtros.
               </div>
@@ -388,40 +273,14 @@ export default function SoportePage() {
                     Jugador: {activeTicket.usuario?.nombre} {activeTicket.usuario?.apellido1} ({activeTicket.usuario?.correo})
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <label htmlFor="ticket-priority" className="text-sm text-muted-foreground">
-                    Prioridad
-                  </label>
-                  <select
-                    id="ticket-priority"
-                    value={selectedPriority}
-                    onChange={(e) => setSelectedPriority(e.target.value as TicketPriority)}
-                    disabled={isSavingPriority}
-                    className="text-sm p-2 bg-background border border-border rounded"
+                {activeTicket.estado !== 'cerrado' && (
+                  <button 
+                    onClick={closeTicket}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-md transition-colors text-sm font-medium"
                   >
-                    {PRIORIDADES.map((prioridad) => (
-                      <option key={prioridad} value={prioridad}>
-                        {prioridad.charAt(0).toUpperCase() + prioridad.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={savePriority}
-                    disabled={isSavingPriority || selectedPriority === activeTicket.prioridad}
-                    className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50"
-                  >
-                    {isSavingPriority ? 'Guardando...' : 'Guardar prioridad'}
+                    <CheckCircle size={16} /> Cerrar Ticket
                   </button>
-                  {activeTicket.estado !== 'cerrado' && (
-                    <button
-                      onClick={closeTicket}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-md transition-colors text-sm font-medium"
-                    >
-                      <CheckCircle size={16} /> Cerrar Ticket
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
 
               {/* Mensajes */}
