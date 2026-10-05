@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, RefreshCw, ChevronLeft, ChevronRight, Download } from 'lucide-react'
 import { useUsuarios } from '@/hooks/useUsuarios'
 import UsuariosTable from '@/components/dashboard/usuarios/UsuariosTable'
 import UserModal from '@/components/dashboard/modals/UserModal'
@@ -27,10 +27,13 @@ export default function UsuariosPage() {
     isModalOpen,
     setIsModalOpen,
     togglingId,
+    exporting,
+    exportNotice,
     fetchUsuarios,
     handleToggleHabilitar,
     handleEditUser,
-    handleSaveUser
+    handleSaveUser,
+    handleExportCsv
   } = useUsuarios()
 
   const usuarios = data?.data || []
@@ -63,6 +66,19 @@ export default function UsuariosPage() {
         </div>
       )}
 
+      {exportNotice && (
+        <div
+          role="alert"
+          className={`p-4 rounded-lg border text-sm ${
+            exportNotice.type === 'success'
+              ? 'bg-green-500/10 border-green-500/30 text-green-500'
+              : 'bg-destructive/10 border-destructive/30 text-destructive'
+          }`}
+        >
+          {exportNotice.message}
+        </div>
+      )}
+
       {/* Filtros */}
       <div className="bg-card border border-border rounded-lg p-4">
         <div className="flex flex-col sm:flex-row gap-4">
@@ -88,6 +104,15 @@ export default function UsuariosPage() {
             <option value="true">Habilitados</option>
             <option value="false">Suspendidos</option>
           </select>
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            disabled={exporting}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 text-sm whitespace-nowrap"
+          >
+            <Download size={17} className={exporting ? 'animate-pulse' : ''} />
+            {exporting ? 'Exportando...' : 'Exportar CSV'}
+          </button>
         </div>
       </div>
 

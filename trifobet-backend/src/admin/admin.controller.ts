@@ -12,7 +12,9 @@ import {
   UseGuards,
   ParseIntPipe,
   Request,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { AdminGuard } from './guards/admin.guard';
 
 // Importación de los nuevos servicios especializados (SRP)
@@ -58,6 +60,28 @@ export class AdminController {
       habilitado,
       rol_id,
     });
+  }
+
+  @Get('users/export/csv')
+  async exportUsuariosCsv(
+    @Res({ passthrough: true }) response: Response,
+    @Query('search') search?: string,
+    @Query('habilitado') habilitado?: string,
+    @Query('rol_id') rol_id?: string,
+  ) {
+    const csv = await this.adminUsersService.exportUsuariosCsv({
+      search,
+      habilitado,
+      rol_id,
+    });
+
+    response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="usuarios_export.csv"',
+    );
+
+    return csv;
   }
 
   @Get('usuarios/:id')
