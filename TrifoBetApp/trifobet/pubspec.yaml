@@ -1,0 +1,68 @@
+name: trifobet
+description: "Casino y apuestas deportivas profesional"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  shared_preferences: ^2.5.3
+  http: ^1.6.0
+  cached_network_image: ^3.4.1
+  provider: ^6.1.2
+  intl: ^0.19.0
+  flutter_svg: ^2.0.10
+  shimmer: ^3.0.0
+  font_awesome_flutter: ^10.7.0
+  flutter_animate: ^4.2.0
+  image_picker: ^1.2.1
+  permission_handler: ^11.3.1
+  device_info_plus: ^10.1.0
+  wechat_assets_picker: ^9.1.0
+  webview_flutter: ^4.9.0
+  sensors_plus: ^5.0.1
+  proximity_sensor: ^1.0.1
+  local_auth: ^2.1.7
+  audioplayers: ^5.2.1
+  flutter_secure_storage: ^9.0.0
+  flutter_local_notifications: ^17.0.0
+  pdf: ^3.10.4
+  printing: ^5.11.0
+  path_provider: ^2.1.1
+  url_launcher: ^6.3.2
+  geolocator: ^14.0.2
+  socket_io_client: ^3.1.6
+  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1  
+
+flutter_icons:                     
+  android: true
+  ios: true
+  image_path: "assets/icons/icon.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/escudos/ChampionsLeague/
+    - assets/escudos/Liga_Alemana/
+    - assets/escudos/Liga_Argentina/
+    - assets/escudos/Liga_Brazileira/
+    - assets/escudos/Liga_Española/
+    - assets/escudos/Liga_Francesa/
+    - assets/escudos/Liga_Inglesa/
+    - assets/escudos/Liga_Italiana/
+    - assets/flags/
+    - assets/leagues/
+    - assets/teams/
+    - assets/images/fondo_login.png
+    - assets/juegos/
+    - assets/sounds/

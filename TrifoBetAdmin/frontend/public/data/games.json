@@ -1,0 +1,76 @@
+{
+  "games": [
+    {
+      "id": "1",
+      "nombre": "Golden Fortune Slots",
+      "tipo": "slots",
+      "proveedor": "Microgaming",
+      "rtp": 96.5,
+      "estado": "activo",
+      "jugadoresActivos": 45,
+      "ingresoHoy": 3200.00,
+      "descripcion": "Tragamonedas de 5 rodillos con tema dorado",
+      "lineasPago": 25,
+      "apuestaMin": 0.10,
+      "apuestaMax": 100.00,
+      "fechaLanzamiento": "2024-01-15"
+    },
+    {
+      "id": "2",
+      "nombre": "Ruleta Europea",
+      "tipo": "mesa",
+      "proveedor": "Evolution Gaming",
+      "rtp": 97.3,
+      "estado": "activo",
+      "jugadoresActivos": 23,
+      "ingresoHoy": 5600.00,
+      "descripcion": "Ruleta europea con transmisión en vivo",
+      "apuestaMin": 1.00,
+      "apuestaMax": 5000.00,
+      "fechaLanzamiento": "2023-11-20"
+    },
+    {
+      "id": "3",
+      "nombre": "Blackjack Classic",
+      "tipo": "mesa",
+      "proveedor": "Playtech",
+      "rtp": 99.5,
+      "estado": "activo",
+      "jugadoresActivos": 18,
+      "ingresoHoy": 2100.00,
+      "descripcion": "Blackjack clásico con varias mesas",
+      "apuestaMin": 0.50,
+      "apuestaMax": 1000.00,
+      "fechaLanzamiento": "2023-10-05"
+    },
+    {
+      "id": "4",
+      "nombre": "Lucky Numbers",
+      "tipo": "instantaneo",
+      "proveedor": "Pragmatic Play",
+      "rtp": 95.0,
+      "estado": "inactivo",
+      "jugadoresActivos": 0,
+      "ingresoHoy": 0.00,
+      "descripcion": "Juego instantáneo basado en números",
+      "apuestaMin": 0.01,
+      "apuestaMax": 50.00,
+      "fechaLanzamiento": "2024-02-01"
+    },
+    {
+      "id": "5",
+      "nombre": "Starburst Supreme",
+      "tipo": "slots",
+      "proveedor": "NetEnt",
+      "rtp": 96.0,
+      "estado": "activo",
+      "jugadoresActivos": 32,
+      "ingresoHoy": 2800.00,
+      "descripcion": "Tragamonedas con gemas brillantes",
+      "lineasPago": 10,
+      "apuestaMin": 0.10,
+      "apuestaMax": 100.00,
+      "fechaLanzamiento": "2024-03-10"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "bets": [
+    {
+      "id": "1",
+      "evento": "Real Madrid vs Barcelona",
+      "deporte": "Fútbol",
+      "mercado": "Ganador del partido",
+      "cuota": 2.5,
+      "estado": "activo",
+      "volumenapuestas": 45000.00,
+      "ingresoEstimado": 3200.00,
+      "fechaInicio": "2024-06-15 20:00",
+      "fechaFin": "2024-06-16 22:00",
+      "liga": "La Liga",
+      "estadio": "Santiago Bernabéu"
+    },
+    {
+      "id": "2",
+      "evento": "Denver Nuggets vs Golden State Warriors",
+      "deporte": "Baloncesto",
+      "mercado": "Puntos totales Over/Under",
+      "cuota": 1.9,
+      "estado": "activo",
+      "volumenapuestas": 32000.00,
+      "ingresoEstimado": 2100.00,
+      "fechaInicio": "2024-06-14 22:30",
+      "fechaFin": "2024-06-15 00:30",
+      "liga": "NBA",
+      "estadio": "Ball Arena"
+    },
+    {
+      "id": "3",
+      "evento": "Nadal vs Djokovic",
+      "deporte": "Tenis",
+      "mercado": "Ganador del torneo",
+      "cuota": 3.2,
+      "estado": "cerrado",
+      "volumenapuestas": 18000.00,
+      "ingresoEstimado": 1200.00,
+      "fechaInicio": "2024-06-10 14:00",
+      "fechaFin": "2024-06-10 18:00",
+      "torneo": "Roland Garros",
+      "superficie": "Arcilla"
+    },
+    {
+      "id": "4",
+      "evento": "Liverpool vs Man City",
+      "deporte": "Fútbol",
+      "mercado": "Empate",
+      "cuota": 2.1,
+      "estado": "activo",
+      "volumenapuestas": 28000.00,
+      "ingresoEstimado": 1800.00,
+      "fechaInicio": "2024-06-16 19:00",
+      "fechaFin": "2024-06-16 21:00",
+      "liga": "Premier League",
+      "estadio": "Anfield"
+    },
+    {
+      "id": "5",
+      "evento": "Argentina vs Brasil",
+      "deporte": "Fútbol",
+      "mercado": "Ganador del partido",
+      "cuota": 1.8,
+      "estado": "activo",
+      "volumenapuestas": 55000.00,
+      "ingresoEstimado": 4500.00,
+      "fechaInicio": "2024-06-20 21:00",
+      "fechaFin": "2024-06-20 23:00",
+      "competencia": "Copa América",
+      "estadio": "MetLife Stadium"
+    }
+  ]
+}

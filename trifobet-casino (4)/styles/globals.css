@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* Blanco */
+    --foreground: 0 0% 3.9%; /* Negro (gris muy oscuro) */
+    --card: 0 0% 100%; /* Blanco */
+    --card-foreground: 0 0% 3.9%; /* Negro (gris muy oscuro) */
+    --popover: 0 0% 100%; /* Blanco */
+    --popover-foreground: 0 0% 3.9%; /* Negro (gris muy oscuro) */
+    --primary: 0 0% 9%; /* Negro (gris oscuro) */
+    --primary-foreground: 0 0% 98%; /* Blanco (gris claro) */
+    --secondary: 0 0% 96.1%; /* Gris claro */
+    --secondary-foreground: 0 0% 9%; /* Negro (gris oscuro) */
+    --muted: 0 0% 96.1%; /* Gris claro */
+    --muted-foreground: 0 0% 45.1%; /* Gris medio */
+    --accent: 0 0% 96.1%; /* Gris claro */
+    --accent-foreground: 0 0% 9%; /* Negro (gris oscuro) */
+    --destructive: 0 84.2% 60.2%; /* Rojo */
+    --destructive-foreground: 0 0% 98%; /* Blanco (gris claro) */
+    --border: 0 0% 89.8%; /* Gris claro */
+    --input: 0 0% 89.8%; /* Gris claro */
+    --ring: 0 0% 3.9%; /* Negro (gris muy oscuro) */
+    --chart-1: 12 76% 61%; /* Rojo-anaranjado */
+    --chart-2: 173 58% 39%; /* Cian/verde azulado (el más cercano a verde) */
+    --chart-3: 197 37% 24%; /* Azul-cian */
+    --chart-4: 43 74% 66%; /* Amarillo-verdoso */
+    --chart-5: 27 87% 67%; /* Anaranjado-amarillo */
+    --radius: 0.5rem; /* No es un color, es un radio */
+    --sidebar-background: 0 0% 98%; /* Blanco (gris muy claro) */
+    --sidebar-foreground: 240 5.3% 26.1%; /* Gris azulado oscuro */
+    --sidebar-primary: 240 5.9% 10%; /* Azul-gris oscuro */
+    --sidebar-primary-foreground: 0 0% 98%; /* Blanco (gris claro) */
+    --sidebar-accent: 240 4.8% 95.9%; /* Gris azulado claro */
+    --sidebar-accent-foreground: 240 5.9% 10%; /* Azul-gris oscuro */
+    --sidebar-border: 220 13% 91%; /* Gris azulado claro */
+    --sidebar-ring: 217.2 91.2% 59.8%; /* Azul claro */
+}
+.dark {
+    --background: 0 0% 3.9%; /* Negro (gris muy oscuro) */
+    --foreground: 0 0% 98%; /* Blanco (gris claro) */
+    --card: 0 0% 3.9%; /* Negro (gris muy oscuro) */
+    --card-foreground: 0 0% 98%; /* Blanco (gris claro) */
+    --popover: 0 0% 3.9%; /* Negro (gris muy oscuro) */
+    --popover-foreground: 0 0% 98%; /* Blanco (gris claro) */
+    --primary: 0 0% 98%; /* Blanco (gris claro) */
+    --primary-foreground: 0 0% 9%; /* Negro (gris oscuro) */
+    --secondary: 0 0% 14.9%; /* Gris oscuro */
+    --secondary-foreground: 0 0% 98%; /* Blanco (gris claro) */
+    --muted: 0 0% 14.9%; /* Gris oscuro */
+    --muted-foreground: 0 0% 63.9%; /* Gris medio */
+    --accent: 0 0% 14.9%; /* Gris oscuro */
+    --accent-foreground: 0 0% 98%; /* Blanco (gris claro) */
+    --destructive: 0 62.8% 30.6%; /* Rojo oscuro */
+    --destructive-foreground: 0 0% 98%; /* Blanco (gris claro) */
+    --border: 0 0% 14.9%; /* Gris oscuro */
+    --input: 0 0% 14.9%; /* Gris oscuro */
+    --ring: 0 0% 83.1%; /* Gris claro */
+    --chart-1: 220 70% 50%; /* Azul */
+    --chart-2: 160 60% 45%; /* Cian/verde azulado (el más cercano a verde) */
+    --chart-3: 30 80% 55%; /* Amarillo-anaranjado */
+    --chart-4: 280 65% 60%; /* Morado */
+    --chart-5: 340 75% 55%; /* Magenta-rosado */
+    --sidebar-background: 240 5.9% 10%; /* Azul-gris oscuro */
+    --sidebar-foreground: 240 4.8% 95.9%; /* Gris azulado claro */
+    --sidebar-primary: 224.3 76.3% 48%; /* Azul */
+    --sidebar-primary-foreground: 0 0% 100%; /* Blanco */
+    --sidebar-accent: 240 3.7% 15.9%; /* Gris azulado oscuro */
+    --sidebar-accent-foreground: 240 4.8% 95.9%; /* Gris azulado claro */
+    --sidebar-border: 240 3.7% 15.9%; /* Gris azulado oscuro */
+    --sidebar-ring: 217.2 91.2% 59.8%; /* Azul claro */
+}
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

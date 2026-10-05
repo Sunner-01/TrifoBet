@@ -1,0 +1,199 @@
+# ============================================================
+# TrifoBet - .gitignore Monorepo
+# Backend (NestJS) | Frontend (Next.js) | Admin (Next.js)
+# Mobile (Flutter/Dart) | Juegos (HTML/CSS/JS)
+# ============================================================
+
+# ========================
+# DEPENDENCIAS
+# ========================
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ========================
+# VARIABLES DE ENTORNO (SECRETOS)
+# ========================
+.env
+.env.*
+!.env.example
+!.env.template
+
+# ========================
+# BUILD / COMPILADOS
+# ========================
+# NestJS backend
+trifobet-backend/dist/
+
+# Next.js (frontend cliente y admin)
+.next/
+out/
+
+# ========================
+# CACHE Y TEMPORALES
+# ========================
+.cache/
+*.tsbuildinfo
+.eslintcache
+.turbo/
+
+# ========================
+# LOGS
+# ========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+hs_err_pid*.log
+replay_pid*.log
+
+# ========================
+# LOCK FILES (dependencias)
+# ========================
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# ========================
+# FLUTTER / DART (app_pagos y TrifoBetApp)
+# ========================
+# Dart tool
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# Flutter build outputs
+**/build/
+*.iml
+
+# Pub cache / dependencies
+.pub-cache/
+.pub/
+pubspec.lock
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+*.gr.dart
+.flutter-plugins-dependencies
+
+# Flutter IDE
+.metadata
+
+# ========================
+# DOCUMENTACION
+# ========================
+DOC/
+
+# ========================
+# APP PAGOS (Flutter - excluida)
+# ========================
+app_pagos/
+
+# ========================
+# IDE Y EDITORES
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ========================
+# OS FILES
+# ========================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.directory
+
+# ========================
+# VERCEL / DEPLOY
+# ========================
+.vercel/
+
+# ========================
+# DATOS LOCALES Y SCRATCH
+# ========================
+trifobet-backend/.data/
+trifobet-backend/scratch/
+*.json.bak
+*.js.bak
+
+# ========================
+# ARCHIVOS GRANDES / TEMPORALES
+# ========================
+api_response.json
+
+# ========================
+# TESTING
+# ========================
+coverage/
+.nyc_output/
+
+# ========================
+# ARCHIVOS DE RESULTADOS / TEST SCRIPTS EN DOC
+# ========================
+DOC/Extras/*.txt
+
+# ========================
+# CERTIFICADOS LOCALES
+# ========================
+*.crt
+*.pem
+*.key
+
+# ========================
+# NEXT.JS ENV TYPES
+# ========================
+next-env.d.ts
+
+# ========================
+# ANDROID ESPECÍFICO (Flutter)
+# ========================
+**/android/.gradle/
+**/android/captures/
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+*.jks
+
+# ========================
+# iOS ESPECÍFICO (Flutter)
+# ========================
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# ========================
+# GIT INTERNOS (submódulos eliminados)
+# ========================
+# Los .git internos se eliminan manualmente, no se suben

@@ -1,0 +1,41 @@
+// ─── Admin: Juegos Casino ────────────────────────────────────
+export interface JuegoCasino {
+  id: number;
+  nombre: string;
+  categoria: string;
+  proveedor: string;
+  rtp: number;
+  habilitado: boolean;
+  es_demo: boolean;
+  imagen_url: string;
+  descripcion: string;
+  url_juego: string;
+  created_at: string;
+  // stats opcionales (por implementar en backend)
+  jugadoresActivos?: number;
+  ingresoHoy?: number;
+}
+
+export async function getJuegosAdmin() {
+  return request<JuegoCasino[]>('/juegos-casino/admin')
+}
+
+export async function createJuego(dto: any) {
+  return request<JuegoCasino>('/juegos-casino', {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  })
+}
+
+export async function updateJuego(id: number, dto: any) {
+  return request<JuegoCasino>(`/juegos-casino/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(dto),
+  })
+}
+
+export async function deleteJuego(id: number) {
+  return request<{ message: string }>(`/juegos-casino/${id}`, {
+    method: 'DELETE',
+  })
+}
