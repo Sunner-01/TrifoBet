@@ -1,5 +1,6 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { historyDateBounds } from '../dto/historial-filtros';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { HistorialApuestasResponse, EstadisticasApuestasResponse, ApuestaResponse } from '../dto/apuesta-response.dto';
 
@@ -62,17 +63,27 @@ export class ApuestasQueryService {
     return this.formatearApuesta(apuesta, selecciones || []);
   }
 
-  async obtenerHistorial(usuarioId: number, estado?: string, limit = 20, offset = 0): Promise<HistorialApuestasResponse> {
+  async obtenerHistorial(usuarioId: number, estado?: string, limit = 20, offset = 0, desde?: string, hasta?: string): Promise<HistorialApuestasResponse> {
+    const owner = Number(usuarioId);
+    if (!Number.isSafeInteger(owner) || owner <= 0) throw new UnauthorizedException('Sesión inválida');
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100 || !Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(offset + limit)) {
+      throw new BadRequestException('limit debe estar entre 1 y 100; offset debe ser un entero no negativo');
+    }
+    const { from, before } = historyDateBounds(desde, hasta);
     let query = this.supabase
       .from('apuesta')
       .select('*', { count: 'exact' })
-      .eq('usuario_id', usuarioId)
+      .eq('usuario_id', owner)
       .order('fecha_creacion', { ascending: false })
-      .range(offset, offset + limit - 1);
+      .order('id', { ascending: false });
 
     if (estado) {
       query = query.eq('estado', estado);
     }
+
+    if (from) query = query.gte('fecha_creacion', from);
+    if (before) query = query.lt('fecha_creacion', before);
+    query = query.range(offset, offset + limit - 1);
 
     const { data: apuestas, error, count } = await query;
 

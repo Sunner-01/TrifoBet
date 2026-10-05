@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -10,25 +10,15 @@ import {
   Search, Filter, ChevronDown, ChevronUp, Wallet,
   TrendingUp, DollarSign, History,
 } from "lucide-react"
-import { apiGet, apiPost } from "@/lib/api"
+import { apiPost } from "@/lib/api"
+import { useSportsHistory } from "@/hooks/useSportsHistory"
+import { HistoryDateFilter, HistoryPagination } from "@/components/profile/HistoryDateFilter"
+import { formatSportsHistoryDate } from "@/lib/sports-history-date"
 import { useToast } from "@/hooks/use-toast"
 
 // ─── Helpers ─────────────────────────────────────────────────
 
-const safeDate = (val) => {
-  if (!val) return null
-  const d = new Date(val)
-  return isNaN(d.getTime()) ? null : d
-}
-
-const formatDate = (val) => {
-  const d = safeDate(val)
-  if (!d) return "—"
-  return d.toLocaleString("es-BO", {
-    day: "2-digit", month: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  })
-}
+const formatDate = formatSportsHistoryDate
 
 const fmtBetId = (id) => `TRF-${String(id).padStart(8, "0")}`
 
@@ -161,42 +151,24 @@ function BetCard({ bet, onCashout }) {
 // ─── Componente principal ─────────────────────────────────────
 
 export default function BetHistory() {
-  const [bets, setBets] = useState([])
-  const [loading, setLoading] = useState(true)
   const [filterTab, setFilterTab] = useState("todas")   // todas | pendiente | ganada | perdida | cashout
   const [searchQuery, setSearchQuery] = useState("")
   const [sortOrder, setSortOrder] = useState("recientes") // recientes | antiguas | monto_mayor | monto_menor
   const [stats, setStats] = useState({ total: 0, pendientes: 0, ganadas: 0, perdidas: 0, cashouts: 0, volumen: 0, ganado: 0 })
+  const history = useSportsHistory(filterTab)
+  const { bets, loading, refresh: fetchHistory } = history
   const { toast } = useToast()
 
-  const fetchHistory = useCallback(async () => {
-    setLoading(true)
-    try {
-      const data = await apiGet("/apuestas-deportivas/historial?limit=100")
-      let list = []
-      if (Array.isArray(data)) list = data
-      else if (data?.apuestas) list = data.apuestas
-      else if (data?.data) list = data.data
-
-      setBets(list)
-
-      // Calcular stats
-      const pendientes = list.filter(b => b.estado === "pendiente")
-      const ganadas = list.filter(b => b.estado === "ganada")
-      const perdidas = list.filter(b => b.estado === "perdida")
-      const cashouts = list.filter(b => b.estado === "cashout")
-      const volumen = list.reduce((acc, b) => acc + Number(b.monto || 0), 0)
-      const ganado  = ganadas.reduce((acc, b) => acc + Number(b.gananciaPotencial ?? b.ganancia_potencial ?? 0), 0)
-
-      setStats({ total: list.length, pendientes: pendientes.length, ganadas: ganadas.length, perdidas: perdidas.length, cashouts: cashouts.length, volumen, ganado })
-    } catch (err) {
-      console.error("Error fetching history:", err)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { fetchHistory() }, [fetchHistory])
+  // Los importes y contadores existentes describen esta página, no el total del rango.
+  useEffect(() => {
+    const pendientes = bets.filter(b => b.estado === "pendiente")
+    const ganadas = bets.filter(b => b.estado === "ganada")
+    const perdidas = bets.filter(b => b.estado === "perdida")
+    const cashouts = bets.filter(b => b.estado === "cashout")
+    const volumen = bets.reduce((acc, b) => acc + Number(b.monto || 0), 0)
+    const ganado = ganadas.reduce((acc, b) => acc + Number(b.gananciaPotencial ?? b.ganancia_potencial ?? 0), 0)
+    setStats({ total: bets.length, pendientes: pendientes.length, ganadas: ganadas.length, perdidas: perdidas.length, cashouts: cashouts.length, volumen, ganado })
+  }, [bets])
 
   const handleCashout = async (betId) => {
     try {
@@ -243,18 +215,19 @@ export default function BetHistory() {
 
   return (
     <div className="flex flex-col h-full">
+      <div className="px-4"><HistoryDateFilter history={history} /></div>
       {/* Stats bar */}
       <div className="grid grid-cols-3 gap-2 px-4 py-3 border-b border-border bg-muted/20">
         <div className="text-center">
-          <p className="text-[10px] text-muted-foreground uppercase">Apostado</p>
+          <p className="text-[10px] text-muted-foreground uppercase">Apostado (página)</p>
           <p className="text-sm font-bold text-foreground">Bs {stats.volumen.toFixed(2)}</p>
         </div>
         <div className="text-center border-x border-border">
-          <p className="text-[10px] text-muted-foreground uppercase">Ganado</p>
+          <p className="text-[10px] text-muted-foreground uppercase">Ganado (página)</p>
           <p className="text-sm font-bold text-green-400">Bs {stats.ganado.toFixed(2)}</p>
         </div>
         <div className="text-center">
-          <p className="text-[10px] text-muted-foreground uppercase">Apuestas</p>
+          <p className="text-[10px] text-muted-foreground uppercase">Apuestas (página)</p>
           <p className="text-sm font-bold text-foreground">{stats.total}</p>
         </div>
       </div>
@@ -281,6 +254,7 @@ export default function BetHistory() {
         ))}
       </div>
 
+      <p className="px-4 pt-2 text-[10px] text-muted-foreground">Los contadores, la búsqueda y el orden se refieren a la página actual. El estado y las fechas filtran todo el historial.</p>
       {/* Búsqueda y ordenado */}
       <div className="flex gap-2 px-4 py-2.5 border-b border-border shrink-0">
         <div className="relative flex-1">
@@ -319,7 +293,7 @@ export default function BetHistory() {
             <History size={40} className="text-muted-foreground" />
             <p className="text-sm font-medium text-foreground">Sin apuestas</p>
             <p className="text-xs text-muted-foreground">
-              {searchQuery ? "No hay resultados para tu búsqueda" : `No tienes apuestas ${filterTab !== "todas" ? filterTab + "s" : ""}`}
+              {searchQuery ? "No hay resultados para tu búsqueda en esta página" : `No tienes apuestas ${filterTab !== "todas" ? filterTab + "s" : ""}`}
             </p>
           </div>
         ) : (
@@ -333,6 +307,7 @@ export default function BetHistory() {
           </div>
         )}
       </ScrollArea>
+      <div className="px-4"><HistoryPagination history={history} /></div>
     </div>
   )
 }

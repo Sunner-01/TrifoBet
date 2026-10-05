@@ -1,10 +1,11 @@
 // components/profile/tabs/BetsTab.jsx
-import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trophy, Activity, Calendar, FileText } from "lucide-react";
 import { useBetHistoryLogic } from "../hooks/useBetHistoryLogic";
+import { HistoryDateFilter, HistoryPagination } from "../HistoryDateFilter";
+import { formatSportsHistoryDate } from "@/lib/sports-history-date";
 
 export function BetsTab() {
   const {
@@ -13,12 +14,8 @@ export function BetsTab() {
     isLoadingApuestas,
     betsTabType,
     setBetsTabType,
-    fetchApuestas
+    sportsHistory
   } = useBetHistoryLogic();
-
-  useEffect(() => {
-    fetchApuestas();
-  }, [fetchApuestas]);
 
   const getBetStatusBadge = (status) => {
     const s = status?.toLowerCase();
@@ -40,13 +37,15 @@ export function BetsTab() {
         </div>
       </div>
 
+      {betsTabType === "deportivas" && <HistoryDateFilter history={sportsHistory} />}
+
       {isLoadingApuestas ? (
         <div className="flex justify-center p-8"><Activity className="h-8 w-8 animate-spin text-muted-foreground" /></div>
       ) : (
         <div className="space-y-4">
           {betsTabType === "deportivas" && (
             apuestasDeportivas.length === 0 ? (
-              <p className="text-center text-muted-foreground p-8">No tienes apuestas deportivas registradas.</p>
+              <p className="text-center text-muted-foreground p-8">No hay apuestas deportivas para el rango seleccionado.</p>
             ) : (
               apuestasDeportivas.map((bet) => (
                 <Card key={bet.id} className="rounded-lg border shadow-sm">
@@ -55,7 +54,7 @@ export function BetsTab() {
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline"><FileText className="h-3 w-3 mr-1"/>#{bet.id}</Badge>
-                          <Badge variant="outline"><Calendar className="h-3 w-3 mr-1"/>{new Date(bet.fechaCreacion).toLocaleString()}</Badge>
+                          <Badge variant="outline"><Calendar className="h-3 w-3 mr-1"/>{formatSportsHistoryDate(bet.fechaCreacion)}</Badge>
                           {getBetStatusBadge(bet.estado)}
                         </div>
                         <h4 className="font-semibold text-lg">{bet.tipo}</h4>
@@ -96,6 +95,7 @@ export function BetsTab() {
           )}
         </div>
       )}
+      {betsTabType === "deportivas" && <HistoryPagination history={sportsHistory} />}
     </div>
   );
 }

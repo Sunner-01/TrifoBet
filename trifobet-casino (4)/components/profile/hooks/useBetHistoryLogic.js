@@ -1,36 +1,53 @@
-// components/profile/hooks/useBetHistoryLogic.js
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { apiGet } from "@/lib/api";
+import { getStoredToken } from "@/lib/auth";
+import { useSportsHistory } from "@/hooks/useSportsHistory";
 
 export function useBetHistoryLogic() {
-  const [apuestasDeportivas, setApuestasDeportivas] = useState([]);
+  const sportsHistory = useSportsHistory();
   const [apuestasCasino, setApuestasCasino] = useState([]);
-  const [isLoadingApuestas, setIsLoadingApuestas] = useState(false);
-  const [betsTabType, setBetsTabType] = useState("deportivas"); // "deportivas" o "casino"
+  const [casinoLoading, setCasinoLoading] = useState(false);
+  const [betsTabType, setBetsTabType] = useState("deportivas");
+  const generation = useRef(0);
 
-  const fetchApuestas = useCallback(async () => {
-    setIsLoadingApuestas(true);
+  const fetchCasino = useCallback(async () => {
+    const current = ++generation.current;
+    const token = getStoredToken();
+    setApuestasCasino([]);
+    if (!token) { setCasinoLoading(false); return; }
+    setCasinoLoading(true);
     try {
-      // Deportivas
-      const depRes = await apiGet('/apuestas-deportivas/historial');
-      setApuestasDeportivas(depRes?.apuestas || []);
-      
-      // Casino
-      const casRes = await apiGet('/juegos-casino/historial/me');
-      setApuestasCasino(Array.isArray(casRes) ? casRes : []);
+      const data = await apiGet("/juegos-casino/historial/me");
+      if (current === generation.current && getStoredToken() === token) {
+        setApuestasCasino(Array.isArray(data) ? data : []);
+      }
     } catch (error) {
-      console.error("Error al cargar historial de apuestas:", error);
+      console.error("Error al cargar historial de casino:", error);
     } finally {
-      setIsLoadingApuestas(false);
+      if (current === generation.current) setCasinoLoading(false);
     }
   }, []);
 
+  useEffect(() => {
+    const onStorage = (event) => { if (event.key === "token" || event.key === null) fetchCasino(); };
+    fetchCasino();
+    window.addEventListener("auth-change", fetchCasino);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      generation.current += 1;
+      window.removeEventListener("auth-change", fetchCasino);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [fetchCasino]);
+
+  const fetchApuestas = useCallback(() => {
+    sportsHistory.refresh();
+    return fetchCasino();
+  }, [sportsHistory.refresh, fetchCasino]);
+
   return {
-    apuestasDeportivas,
-    apuestasCasino,
-    isLoadingApuestas,
-    betsTabType,
-    setBetsTabType,
-    fetchApuestas
+    apuestasDeportivas: sportsHistory.bets, apuestasCasino,
+    isLoadingApuestas: betsTabType === "deportivas" ? sportsHistory.loading : casinoLoading,
+    betsTabType, setBetsTabType, fetchApuestas, sportsHistory,
   };
 }
